@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pocketdev-agent"
+version = "0.1.0"
+description = "PocketDev AI agent runner: LangGraph agents that run inside the user's own GitHub Actions."
+readme = "README.md"
+requires-python = ">=3.13"
+# Pinned (supply-chain rule in documents/security.md). Versions current as of 2026-11-19.
+dependencies = [
+    "langgraph==1.2.23",
+    "langchain-core==1.8.3",
+    "langchain-google-genai==4.5.1",
+    "langchain-groq==1.2.1",
+    "langchain-openai==1.8.3",
+    "langchain-anthropic==1.7.11",
+    "httpx==0.28.1",
+]
+
+[project.optional-dependencies]
+test = ["pytest==9.2.0"]
+
+[project.scripts]
+pocketdev-agent = "pocketdev_agent.runner:main"
+
+[tool.setuptools]
+packages = ["pocketdev_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
