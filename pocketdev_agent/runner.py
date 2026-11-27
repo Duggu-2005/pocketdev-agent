@@ -1,6 +1,7 @@
 """Entry point: `python -m pocketdev_agent`."""
 from __future__ import annotations
 
+import dataclasses
 import logging
 import sys
 import time
@@ -15,7 +16,7 @@ from pocketdev_agent.config import NO_KEY_MESSAGE, Settings
 from pocketdev_agent.gitops import ALWAYS_PROTECTED, GitError, GitRepo, PushRefused
 from pocketdev_agent.graph import build_graph
 from pocketdev_agent.limits import Budget
-from pocketdev_agent.models import build_models
+from pocketdev_agent.models import build_models, resolve_providers
 from pocketdev_agent.payloads import result_payload
 from pocketdev_agent.redact import RedactingFilter, Redactor
 from pocketdev_agent.sandbox import Workspace
@@ -71,6 +72,11 @@ def run(settings: Settings, api: ApiClient, model_factory: Callable[[Settings], 
             log.error("could not report failure: %s", redact(str(e)))
         return 1
 
+    providers, warning = resolve_providers(settings.providers, task)
+    if warning:
+        log.warning("%s", warning)
+        api.post_event("log", "system", warning)
+    settings = dataclasses.replace(settings, providers=providers)
     models = model_factory(settings)
     if not models:
         return fail(NO_KEY_MESSAGE)
